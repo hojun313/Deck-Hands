@@ -113,12 +113,21 @@ function love.mousepressed(x, y, mouseButton, istouch, presses)
             clickedButton = "버튼이 눌렸습니다."
             -- 필드에 있던 카드들을 죽은 덱으로 옮기기
             for i = #field, 1, -1 do
-                table.insert(deadPile, table.remove(field, i))
+                if not buttonStates[i] then -- 눌리지 않은 카드만 이동
+                    table.insert(deadPile, table.remove(field, i))
+                end
             end
 
             -- 덱에서 카드 5장 뽑기
             local deck_num = #deck
-            if deck_num < 5 then
+            local lockedCardCount = 0
+            for _, state in pairs(buttonStates) do
+                if state then
+                    lockedCardCount = lockedCardCount + 1
+                end
+            end
+            local cardsToDraw = 5 - lockedCardCount -- 눌린 카드 수를 제외한 카드 수
+            if deck_num < cardsToDraw then
                 for i = 1, deck_num do
                     local card = cardModule.drawCard(deck)
                     card.image = card.suit:lower() .. "_" .. card.rank
@@ -128,13 +137,13 @@ function love.mousepressed(x, y, mouseButton, istouch, presses)
                     table.insert(deck, table.remove(deadPile, i))
                 end
                 deck = lume.shuffle(deck)
-                for i = 1, 5 - deck_num do
+                for i = 1, cardsToDraw - deck_num do
                     local card = cardModule.drawCard(deck)
                     card.image = card.suit:lower() .. "_" .. card.rank
                     table.insert(field, card)
                 end
             else
-                for i = 1, 5 do
+                for i = 1, cardsToDraw do
                     local card = cardModule.drawCard(deck)
                     card.image = card.suit:lower() .. "_" .. card.rank
                     table.insert(field, card)
