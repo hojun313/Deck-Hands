@@ -4,6 +4,8 @@
 local cardModule = require("scripts/card") -- "card"는 card.lua 파일 이름 (확장자 .lua 생략)
 local lume = require("scripts/lume")
 
+local clickedButton = ""
+
 function love.load()
     -- lume.setup() -- lume 라이브러리 초기화
     -- gui = lume.canvas()
@@ -34,6 +36,8 @@ function love.load()
         height = 50,
         text = "버튼"
     }
+
+    buttonStates = {} -- 버튼 상태를 저장할 테이블 초기화
 end
 
 function isInsideRect(x, y, rectX, rectY, rectWidth, rectHeight)
@@ -57,8 +61,14 @@ function love.draw()
             if cardImage then
                 love.graphics.draw(cardImage, startX + (i - 1) * 60 * 4, startY, 0, 4, 4) -- 간격을 줄임
                 -- 카드 위에 버튼 그리기
+                if buttonStates[i] then
+                    love.graphics.setColor(0, 1, 0) -- 버튼이 눌린 상태면 초록색으로 표시
+                else
+                    love.graphics.setColor(1, 1, 1) -- 버튼이 눌리지 않은 상태면 흰색으로 표시
+                end
                 love.graphics.rectangle("line", startX + (i - 1) * 60 * 4 + 20, startY - 30, cardWidth - 40, 30)
                 love.graphics.printf("버튼 " .. i, startX + (i - 1) * 60 * 4, startY - 30 + 10, cardWidth, "center")
+                love.graphics.setColor(1, 1, 1) -- 색상 초기화
             end
         end
     else
@@ -92,11 +102,15 @@ function love.draw()
     for i, card in ipairs(deck) do
         love.graphics.print(card.suit .. " " .. card.rank, deckX, deckY + 20 * i)
     end
+
+    -- 클릭된 버튼 출력
+    love.graphics.print(clickedButton, 100, 150)
 end
 
 function love.mousepressed(x, y, mouseButton, istouch, presses)
     if mouseButton == 1 then
         if isInsideRect(x, y, rebutton.x, rebutton.y, rebutton.width, rebutton.height) then
+            clickedButton = "버튼이 눌렸습니다."
             -- 필드에 있던 카드들을 죽은 덱으로 옮기기
             for i = #field, 1, -1 do
                 table.insert(deadPile, table.remove(field, i))
@@ -125,6 +139,16 @@ function love.mousepressed(x, y, mouseButton, istouch, presses)
                     card.image = card.suit:lower() .. "_" .. card.rank
                     table.insert(field, card)
                 end
+            end
+        end
+
+        -- 카드 버튼 클릭 처리
+        for i, card in ipairs(field) do
+            local cardX = (love.graphics.getWidth() - ((#field - 1) * 60 * 4 + cardImages["card_back"]:getWidth() * 4)) / 2 + (i - 1) * 60 * 4
+            local cardY = (love.graphics.getHeight() - cardImages["card_back"]:getHeight() * 4) / 2
+            if isInsideRect(x, y, cardX + 20, cardY - 30, cardImages["card_back"]:getWidth() * 4 - 40, 30) then
+                buttonStates[i] = not buttonStates[i] -- 버튼 상태 토글
+                clickedButton = "버튼 " .. i .. (buttonStates[i] and "이 눌렸습니다." or "이 해제되었습니다.")
             end
         end
     end
