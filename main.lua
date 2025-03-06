@@ -55,6 +55,23 @@ function love.draw()
     local startX = (screenWidth - totalWidth) / 2
     local startY = (screenHeight - cardHeight) / 2
 
+    -- 화면 위쪽에 직사각형 그리기
+
+    local num_cols = 10
+    local num_rows = 2
+    local small_rect_width = 1900 / num_cols
+    local small_rect_height = 250 / num_rows
+    
+    for row_index = 0, num_rows - 1 do
+        for col_index = 0, num_cols - 1 do
+            local x = 70 + col_index * small_rect_width
+            local y = 70 + row_index * small_rect_height
+            love.graphics.rectangle("line", x, y, small_rect_width, small_rect_height)
+        end
+    end
+
+
+
     local fields = {field1, field2, field3, field4, field5}
     for i, card in ipairs(fields) do
         if card then
@@ -92,6 +109,8 @@ function love.draw()
     love.graphics.draw(cardImages[deadPileImage], startX + totalWidth + 100, startY + cardHeight / 2 + 80, 0, 4, 4)
     love.graphics.print("죽은 카드 수: " .. #deadPile, startX + totalWidth + 100 + cardWidth / 4, startY + 180)
 
+    local totalCards = #fields + #deck + #deadPile
+    love.graphics.print("전체 카드 수: " .. totalCards, 100, 90)
     love.graphics.print("뽑은 카드 수: " .. #fields, 100, 120 + 30 * (#fields + 1))
 
     -- 덱에 남아있는 카드 표시

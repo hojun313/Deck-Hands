@@ -26,7 +26,7 @@ function love.load()
     -- 덱 섞기
     deck = lume.shuffle(deck) -- lume.shuffle() 함수 호출하여 덱 섞기
 
-    field = {}
+    field1, field2, field3, field4, field5 = nil, nil, nil, nil, nil
     deadPile = {} -- 죽은 카드 더미 초기화
 
     rebutton = {
@@ -37,7 +37,7 @@ function love.load()
         text = "버튼"
     }
 
-    buttonStates = {} -- 버튼 상태를 저장할 테이블 초기화
+    buttonStates = {false, false, false, false, false} -- 버튼 상태를 저장할 테이블 초기화
 end
 
 function isInsideRect(x, y, rectX, rectY, rectWidth, rectHeight)
@@ -55,8 +55,9 @@ function love.draw()
     local startX = (screenWidth - totalWidth) / 2
     local startY = (screenHeight - cardHeight) / 2
 
-    if (#field > 0) then
-        for i, card in ipairs(field) do
+    local fields = {field1, field2, field3, field4, field5}
+    for i, card in ipairs(fields) do
+        if card then
             local cardImage = cardImages[card.image]
             if cardImage then
                 love.graphics.draw(cardImage, startX + (i - 1) * 60 * 4, startY, 0, 4, 4) -- 간격을 줄임
@@ -70,9 +71,7 @@ function love.draw()
                 love.graphics.printf("버튼 " .. i, startX + (i - 1) * 60 * 4, startY - 30 + 10, cardWidth, "center")
                 love.graphics.setColor(1, 1, 1) -- 색상 초기화
             end
-        end
-    else
-        for i = 1, 5 do
+        else
             love.graphics.draw(cardImages["card_place"], startX + (i - 1) * 60 * 4, startY, 0, 4, 4) -- 간격을 줄임
         end
     end
@@ -93,11 +92,11 @@ function love.draw()
     love.graphics.draw(cardImages[deadPileImage], startX + totalWidth + 100, startY + cardHeight / 2 + 80, 0, 4, 4)
     love.graphics.print("죽은 카드 수: " .. #deadPile, startX + totalWidth + 100 + cardWidth / 4, startY + 180)
 
-    love.graphics.print("뽑은 카드 수: " .. #field, 100, 120 + 30 * (#field + 1))
+    love.graphics.print("뽑은 카드 수: " .. #fields, 100, 120 + 30 * (#fields + 1))
 
     -- 덱에 남아있는 카드 표시
     local deckX = 100
-    local deckY = 120 + 30 * (#field + 2)
+    local deckY = 120 + 30 * (#fields + 2)
     love.graphics.print("덱에 남아있는 카드:", deckX, deckY)
     for i, card in ipairs(deck) do
         love.graphics.print(card.suit .. " " .. card.rank, deckX, deckY + 20 * i)
@@ -111,27 +110,35 @@ function love.mousepressed(x, y, mouseButton, istouch, presses)
     if mouseButton == 1 then
         if isInsideRect(x, y, rebutton.x, rebutton.y, rebutton.width, rebutton.height) then
             clickedButton = "버튼이 눌렸습니다."
-            -- 필드에 있던 카드들을 죽은 덱으로 옮기기
-            for i = #field, 1, -1 do
-                if not buttonStates[i] then -- 눌리지 않은 카드만 이동
-                    table.insert(deadPile, table.remove(field, i))
+
+            local fields = {field1, field2, field3, field4, field5}
+            local newFields = {nil, nil, nil, nil, nil}
+            local newButtonStates = {false, false, false, false, false}
+
+            -- 필드에 있던 카드들을 새로운 테이블로 옮기기 (눌린 카드는 그대로, 나머지는 deadPile로)
+            for i, card in ipairs(fields) do
+                if buttonStates[i] then
+                    newFields[i] = card
+                    newButtonStates[i] = buttonStates[i]
+                else
+                    table.insert(deadPile, card)
                 end
             end
 
-            -- 덱에서 카드 5장 뽑기
+            -- 덱에서 카드 뽑아서 필드에 추가하기
             local deck_num = #deck
-            local lockedCardCount = 0
-            for _, state in pairs(buttonStates) do
-                if state then
-                    lockedCardCount = lockedCardCount + 1
-                end
-            end
-            local cardsToDraw = 5 - lockedCardCount -- 눌린 카드 수를 제외한 카드 수
+            local cardsToDraw = 5 - lume.count(newFields, function(v) return v ~= nil end)
             if deck_num < cardsToDraw then
                 for i = 1, deck_num do
                     local card = cardModule.drawCard(deck)
                     card.image = card.suit:lower() .. "_" .. card.rank
-                    table.insert(field, card)
+                    for j = 1, 5 do
+                        if not newFields[j] then
+                            newFields[j] = card
+                            newButtonStates[j] = false
+                            break
+                        end
+                    end
                 end
                 for i = #deadPile, 1, -1 do
                     table.insert(deck, table.remove(deadPile, i))
@@ -140,20 +147,36 @@ function love.mousepressed(x, y, mouseButton, istouch, presses)
                 for i = 1, cardsToDraw - deck_num do
                     local card = cardModule.drawCard(deck)
                     card.image = card.suit:lower() .. "_" .. card.rank
-                    table.insert(field, card)
+                    for j = 1, 5 do
+                        if not newFields[j] then
+                            newFields[j] = card
+                            newButtonStates[j] = false
+                            break
+                        end
+                    end
                 end
             else
                 for i = 1, cardsToDraw do
                     local card = cardModule.drawCard(deck)
                     card.image = card.suit:lower() .. "_" .. card.rank
-                    table.insert(field, card)
+                    for j = 1, 5 do
+                        if not newFields[j] then
+                            newFields[j] = card
+                            newButtonStates[j] = false
+                            break
+                        end
+                    end
                 end
             end
+
+            field1, field2, field3, field4, field5 = newFields[1], newFields[2], newFields[3], newFields[4], newFields[5]
+            buttonStates = newButtonStates
         end
 
         -- 카드 버튼 클릭 처리
-        for i, card in ipairs(field) do
-            local cardX = (love.graphics.getWidth() - ((#field - 1) * 60 * 4 + cardImages["card_back"]:getWidth() * 4)) / 2 + (i - 1) * 60 * 4
+        local fields = {field1, field2, field3, field4, field5}
+        for i, card in ipairs(fields) do
+            local cardX = (love.graphics.getWidth() - ((#fields - 1) * 60 * 4 + cardImages["card_back"]:getWidth() * 4)) / 2 + (i - 1) * 60 * 4
             local cardY = (love.graphics.getHeight() - cardImages["card_back"]:getHeight() * 4) / 2
             if isInsideRect(x, y, cardX + 20, cardY - 30, cardImages["card_back"]:getWidth() * 4 - 40, 30) then
                 buttonStates[i] = not buttonStates[i] -- 버튼 상태 토글
