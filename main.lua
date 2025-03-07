@@ -3,6 +3,7 @@
 -- card.lua 모듈 로드
 local cardModule = require("scripts/card") -- "card"는 card.lua 파일 이름 (확장자 .lua 생략)
 local lume = require("scripts/lume")
+local scoreboardModule = require("scripts/scoreboard")
 
 local clickedButton = ""
 
@@ -38,6 +39,8 @@ function love.load()
     }
 
     buttonStates = {false, false, false, false, false} -- 버튼 상태를 저장할 테이블 초기화
+
+    scoreboardModule.init()
 end
 
 function isInsideRect(x, y, rectX, rectY, rectWidth, rectHeight)
@@ -45,7 +48,6 @@ function isInsideRect(x, y, rectX, rectY, rectWidth, rectHeight)
 end
 
 function love.draw()
-    love.graphics.print("덱 생성 완료. 콘솔(터미널) 출력을 확인하세요!", 100, 100)
 
     local screenWidth = love.graphics.getWidth()
     local screenHeight = love.graphics.getHeight()
@@ -57,18 +59,7 @@ function love.draw()
 
     -- 화면 위쪽에 직사각형 그리기
 
-    local num_cols = 10
-    local num_rows = 2
-    local small_rect_width = 1900 / num_cols
-    local small_rect_height = 250 / num_rows
-    
-    for row_index = 0, num_rows - 1 do
-        for col_index = 0, num_cols - 1 do
-            local x = 70 + col_index * small_rect_width
-            local y = 70 + row_index * small_rect_height
-            love.graphics.rectangle("line", x, y, small_rect_width, small_rect_height)
-        end
-    end
+    scoreboardModule.drawScoreboard()
 
 
 
