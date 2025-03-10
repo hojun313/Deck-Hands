@@ -57,13 +57,11 @@ function love.draw()
     local startX = (screenWidth - totalWidth) / 2
     local startY = (screenHeight - cardHeight) / 2
 
-    -- 화면 위쪽에 직사각형 그리기
-
-    scoreboardModule.drawScoreboard()
-
-
-
     local fields = {field1, field2, field3, field4, field5}
+    local scores = scoreboardModule.calculateScore(fields)
+    
+    scoreboardModule.drawScoreboard(scores)
+
     for i, card in ipairs(fields) do
         if card then
             local cardImage = cardImages[card.image]
@@ -105,7 +103,7 @@ function love.draw()
     love.graphics.print("뽑은 카드 수: " .. #fields, 100, 120 + 30 * (#fields + 1))
 
     -- 덱에 남아있는 카드 표시
-    local deckX = 100
+    local deckX = 100                       + 2200
     local deckY = 120 + 30 * (#fields + 2)
     love.graphics.print("덱에 남아있는 카드:", deckX, deckY)
     for i, card in ipairs(deck) do
