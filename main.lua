@@ -40,7 +40,7 @@ function love.load()
 
     buttonStates = {false, false, false, false, false} -- 버튼 상태를 저장할 테이블 초기화
 
-    scoreboardModule.init() -- 테스트용으로 추가
+    scoreboardModule.init()
 end
 
 function isInsideRect(x, y, rectX, rectY, rectWidth, rectHeight)

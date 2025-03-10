@@ -57,19 +57,27 @@ function scoreboard.calculateScore(fieldCards)
     -- fieldCards는 5개의 카드 정보가 담긴 테이블
     -- 각 카드 정보는 {suit = "spades", rank = "A"} 형태로 제공된다고 가정
 
+
+
     -- 예시 점수 계산 로직 (간단한 족보 체크)
-    local rankCount = {}
+    local rankCount = {} -- 각 숫자 몇번 등장했는지 저장
     for _, card in ipairs(fieldCards) do
         rankCount[card.rank] = (rankCount[card.rank] or 0) + 1
+
+        if card.rank == "A" then
+            scores[6] = scores[6] + 1 -- A 카드가 있으면 HIGH 카드
+        end
     end
 
     -- 예시: 트리플, 풀하우스, 포카드 등 간단한 족보 체크
     for rank, count in pairs(rankCount) do
         if count == 4 then
             scores[14] = scores[14] + 7 -- 포카드
-        elseif count == 3 then
+        end
+        if count >= 3 then
             scores[10] = scores[10] + 3 -- 트리플
-        elseif count == 2 then
+        end
+        if count >= 2 then
             scores[8] = scores[8] + 1 -- 원페어
         end
     end
