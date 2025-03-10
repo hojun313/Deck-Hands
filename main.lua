@@ -122,12 +122,14 @@ function love.mousepressed(x, y, mouseButton, istouch, presses)
             local fields = {field1, field2, field3, field4, field5}
             local newFields = {nil, nil, nil, nil, nil}
             local newButtonStates = {false, false, false, false, false}
+            local buttonNum = lume.count(buttonStates, function(v) return v end)
 
             -- 필드에 있던 카드들을 새로운 테이블로 옮기기 (눌린 카드는 그대로, 나머지는 deadPile로)
             for i, card in ipairs(fields) do
                 if buttonStates[i] then
                     newFields[i] = card
                     newButtonStates[i] = buttonStates[i]
+
                 else
                     table.insert(deadPile, card)
                 end
@@ -135,7 +137,7 @@ function love.mousepressed(x, y, mouseButton, istouch, presses)
 
             -- 덱에서 카드 뽑아서 필드에 추가하기
             local deck_num = #deck
-            local cardsToDraw = 5 - lume.count(newFields, function(v) return v ~= nil end)
+            local cardsToDraw = 5 - lume.count(buttonStates, function(v) return v end)
             if deck_num < cardsToDraw then
                 for i = 1, deck_num do
                     local card = cardModule.drawCard(deck)
