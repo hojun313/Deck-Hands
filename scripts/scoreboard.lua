@@ -13,11 +13,10 @@ function scoreboard.init()
 end
 
 -- 점수판 그리기 함수
-function scoreboard.drawScoreboard()
-    
+function scoreboard.drawScoreboard(scores)
     love.graphics.setColor(1, 1, 1) -- 흰색으로 설정
     
-    local player_names = {"플레이어", "플레이어 1", "플레이어 2"} -- 플레이어 이름 목록
+    local player_names = {"플레이어", "빨간 사자", "파란 늑대"} -- 플레이어 이름 목록
     local jokbo_names = {"", "10", "J", "Q", "K", "A", "HIGH", "DOUBLE", "TWO PAIR", "TRIPLE", "STRAIGHT", "FLUSH", "FULL HOUSE", "FOUR CARD", "STRAIGHT FLUSH", "ROYAL STRAIGHT FLUSH"}
 
     for row_index = 0, num_rows - 1 do
@@ -28,26 +27,54 @@ function scoreboard.drawScoreboard()
 
             local text = ""
 
-            if row_index == 0 and col_index ~= 0 then -- 첫 번째 줄 (row_index 가 0일 때)
-                if jokbo_names[col_index + 1] then -- jokbo_names 테이블에 해당 인덱스가 있는지 확인
-                    text = jokbo_names[col_index + 1] -- 족보 이름 가져오기
-                end
-            elseif col_index == 0 then -- 두 번째 줄부터, 가장 왼쪽 열 (col_index 가 0일 때)
+            if col_index == 0 then -- 가장 왼쪽 위 칸
                 if player_names[row_index + 1] then
                     text = player_names[row_index + 1]
                 end
+            elseif row_index == 0 then -- 첫 번째 줄 (row_index 가 0일 때)
+                if jokbo_names[col_index + 1] then -- jokbo_names 테이블에 해당 인덱스가 있는지 확인
+                    text = jokbo_names[col_index + 1]
+                end
             else
-                text = "(" .. col_index .. ", " .. row_index .. ")" -- 그 외 칸에는 칸 번호 표시
+                score = scores[col_index + 1]
+                if score then
+                    text = score
+                end
             end
-
             love.graphics.print(text, x + 10, y + 10)
         end
     end
 end
 
--- 점수 계산 함수 (점수 계산 로직이 생기면 여기에 추가)
-function scoreboard.calculateScore()
-    -- 점수 계산 로직 (미구현)
+-- 점수 계산 함수 (점수 계산 로직 추가)
+function scoreboard.calculateScore(fieldCards)
+    local scores = {}
+    for i = 1, 14 do
+        scores[i] = 0
+    end
+
+    -- 점수 계산 로직 (예시: 족보에 따라 점수 계산)
+    -- fieldCards는 5개의 카드 정보가 담긴 테이블
+    -- 각 카드 정보는 {suit = "spades", rank = "A"} 형태로 제공된다고 가정
+
+    -- 예시 점수 계산 로직 (간단한 족보 체크)
+    local rankCount = {}
+    for _, card in ipairs(fieldCards) do
+        rankCount[card.rank] = (rankCount[card.rank] or 0) + 1
+    end
+
+    -- 예시: 트리플, 풀하우스, 포카드 등 간단한 족보 체크
+    for rank, count in pairs(rankCount) do
+        if count == 4 then
+            scores[14] = scores[14] + 7 -- 포카드
+        elseif count == 3 then
+            scores[10] = scores[10] + 3 -- 트리플
+        elseif count == 2 then
+            scores[8] = scores[8] + 1 -- 원페어
+        end
+    end
+
+    return scores
 end
 
 return scoreboard -- 모듈 테이블 반환
