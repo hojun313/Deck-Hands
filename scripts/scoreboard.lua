@@ -114,7 +114,7 @@ function scoreboard.calculateScore(fieldCards)
        rankOrder[ranks[2]] + 1 == rankOrder[ranks[3]] and
        rankOrder[ranks[3]] + 1 == rankOrder[ranks[4]] and
        rankOrder[ranks[4]] + 1 == rankOrder[ranks[5]] then
-        scores[11] = 999 -- rankOrder[ranks[5]] * 5
+        scores[11] = 999 -- rankOrder[ranks[5]] * 5 
     end
 
     -- 플러시 감지 및 점수 추가
