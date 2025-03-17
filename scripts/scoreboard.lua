@@ -117,6 +117,38 @@ function scoreboard.calculateScore(fieldCards)
         scores[11] = 999 -- rankOrder[ranks[5]] * 5
     end
 
+    -- 플러시 감지 및 점수 추가
+    if #suits == 5 and
+       suitCount[suits[1]] == 5 then
+        scores[12] = 999
+    end
+
+    -- 풀하우스 감지 및 점수 추가
+    local hasThree = false
+    local hasPair = false
+    local threeRank = nil
+
+    for rank, count in pairs(rankCount) do
+        if count == 3 then
+            hasThree = true
+            threeRank = rank
+        elseif count == 2 then
+            hasPair = true
+        end
+    end
+
+    if hasThree and hasPair then
+        scores[13] = 1000 -- 풀하우스 점수 (임의 값)
+    end
+
+    -- 스트레이트 플러시 감지 및 점수 추가
+    if scores[11] > 0 and scores[12] > 0 then
+        scores[15] = 10000 -- 스트레이트 플러시 점수 (임의 값)
+    else
+        scores[15] = 0
+    end
+    
+
     return scores
 end
 
