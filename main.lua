@@ -6,6 +6,7 @@ local lume = require("scripts/lume")
 local scoreboardModule = require("scripts/scoreboard")
 
 local clickedButton = ""
+
 local currentPlayer = 1  -- 현재 플레이어 (1 또는 2)
 local turnCount = {  -- 각 플레이어의 남은 턴 수
     [1] = 3,
@@ -126,6 +127,14 @@ end
 
 function love.mousepressed(x, y, mouseButton, istouch, presses)
     if mouseButton == 1 then
+        -- 스코어보드 칸 클릭 확인
+        local clickedTile = scoreboardModule.checkTileClick(x, y)
+        if clickedTile >= 0 then
+            selectedTile = clickedTile
+            clickedButton = clickedTile .. "번 칸이 선택되었습니다."
+            return  -- 스코어보드 칸을 클릭했으면 다른 클릭 처리는 하지 않음
+        end
+
         if isInsideRect(x, y, rebutton.x, rebutton.y, rebutton.width, rebutton.height) then
             clickedButton = "플레이어 " .. currentPlayer .. "가 버튼을 눌렀습니다."
             

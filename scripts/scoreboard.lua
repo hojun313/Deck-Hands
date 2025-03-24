@@ -23,6 +23,14 @@ function scoreboard.drawScoreboard(scores)
         for col_index = 0, num_cols - 1 do
             local x = 70 + col_index * small_rect_width
             local y = 70 + row_index * small_rect_height
+            
+            -- 선택된 칸 하이라이트
+            if selectedTile == col_index then
+                love.graphics.setColor(0.3, 0.3, 0.3)
+                love.graphics.rectangle("fill", x, y, small_rect_width, small_rect_height)
+                love.graphics.setColor(1, 1, 1)
+            end
+            
             love.graphics.rectangle("line", x, y, small_rect_width, small_rect_height)
 
             local text = ""
@@ -150,6 +158,21 @@ function scoreboard.calculateScore(fieldCards)
     
 
     return scores
+end
+
+-- 클릭한 칸 확인 함수 추가
+function scoreboard.checkTileClick(x, y)
+    for col_index = 0, num_cols - 1 do
+        local tileX = 70 + col_index * small_rect_width
+        local tileY = 70  -- 첫 번째 행만 선택 가능하도록
+        
+        -- 클릭한 위치가 칸 안에 있는지 확인
+        if x >= tileX and x <= tileX + small_rect_width and
+           y >= tileY and y <= tileY + small_rect_height then
+            return col_index
+        end
+    end
+    return -1  -- 칸 밖을 클릭한 경우
 end
 
 return scoreboard -- 모듈 테이블 반환
