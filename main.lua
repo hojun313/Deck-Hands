@@ -6,6 +6,11 @@ local lume = require("scripts/lume")
 local scoreboardModule = require("scripts/scoreboard")
 
 local clickedButton = ""
+local currentPlayer = 1  -- 현재 플레이어 (1 또는 2)
+local turnCount = {  -- 각 플레이어의 남은 턴 수
+    [1] = 3,
+    [2] = 3
+}
 
 function love.load()
     -- lume.setup() -- lume 라이브러리 초기화
@@ -62,6 +67,11 @@ function love.draw()
     
     scoreboardModule.drawScoreboard(scores)
 
+    -- 현재 플레이어와 남은 턴 수 표시 (scoreboard 위에 표시)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.print("플레이어 " .. currentPlayer .. "의 차례", 100, 30)
+    love.graphics.print("남은 턴 수: " .. turnCount[currentPlayer], 100, 60)
+
     for i, card in ipairs(fields) do
         if card then
             local cardImage = cardImages[card.image]
@@ -117,7 +127,16 @@ end
 function love.mousepressed(x, y, mouseButton, istouch, presses)
     if mouseButton == 1 then
         if isInsideRect(x, y, rebutton.x, rebutton.y, rebutton.width, rebutton.height) then
-            clickedButton = "버튼이 눌렸습니다."
+            clickedButton = "플레이어 " .. currentPlayer .. "가 버튼을 눌렀습니다."
+            
+            -- 턴 카운트 감소
+            turnCount[currentPlayer] = turnCount[currentPlayer] - 1
+            
+            -- 턴 전환 로직
+            if turnCount[currentPlayer] <= 0 then
+                currentPlayer = currentPlayer == 1 and 2 or 1  -- 플레이어 전환
+                turnCount[currentPlayer] = 3  -- 새로운 플레이어의 턴 수 초기화
+            end
 
             local fields = {field1, field2, field3, field4, field5}
             local newFields = {nil, nil, nil, nil, nil}
